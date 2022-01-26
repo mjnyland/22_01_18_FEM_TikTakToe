@@ -109,6 +109,14 @@ class Model{
         }
     }
 
+    resetBoard(){
+        for(let i = 0; i < 8; i++){
+            this.board[i].isAvail = true;
+            this.board[i].occupiedBy = null;
+        }
+
+        this.currentUser = 1;
+    }
 
 }
 
@@ -123,6 +131,8 @@ class View{
         this.xTurn = this.getElement('.x-icon');
         this.oTurn = this.getElement('.o-icon');
         this.replayButton = this.getElement('.replay-button');
+        this.replayButtonModal = this.getElement('.restart-button');
+        this.replayCancel = this.getElement('.cancel-button');
 
         this.squareZero = this.createElement('div', 'squareZero', 'square');
         this.squareOne = this.createElement('div', 'squareOne', 'square');
@@ -186,19 +196,6 @@ class View{
         return element;
     }
 
-    resetSquares(){
-        const xSquares = document.querySelectorAll('.x-square');
-        const oSquares = document.querySelectorAll('.o-square');
-
-        for (let xSquare of xSquares){
-            xSquare.classList.remove('x-square');
-        }
-
-        for (let oSquare of oSquares){
-            oSquare.classList.remove('o-square');
-        }
-    }
-
     displaySquares(square, user){
         const squares = document.querySelectorAll('.square');
         const targetSquare = squares[square];
@@ -221,17 +218,49 @@ class View{
     }
 
     bindMove(callback){
-        this.squaresCont.addEventListener('click', e => {
-            if(e.target.className === 'replay-button'){
-                this.restartGameOverlay.style.display = 'flex';
-                this.gameOverShadow.style.display = 'block';
-                this.resetSquares();
-            } else {
+        const squares = document.querySelectorAll('.square');
+        squares.forEach(square => {
+            square.addEventListener('click', e => {
                 const targetIndex = this.checkMatch(e.target);
                 callback(targetIndex); 
-            }
+            })
         })
     }
+    
+    bindReplayModal(callback){
+        this.replayButton.addEventListener('click', (e) => {
+            this.restartGameOverlay.style.display = 'flex';
+            this.gameOverShadow.style.display = 'block';
+
+            callback()
+        })
+    }
+
+    resetSquares(){
+        this.replayButtonModal.addEventListener('click', (e) => {
+            const xSquares = document.querySelectorAll('.x-square');
+            const oSquares = document.querySelectorAll('.o-square');
+            this.restartGameOverlay.style.display = 'none';
+            this.gameOverShadow.style.display = 'none';
+
+            for (let xSquare of xSquares){
+                xSquare.classList.remove('x-square');
+            }
+
+            for (let oSquare of oSquares){
+                oSquare.classList.remove('o-square');
+            }
+
+            this.displayCurrTurn(1)
+        })
+
+        this.replayCancel.addEventListener('click', (e) => {
+            this.restartGameOverlay.style.display = 'none';
+            this.gameOverShadow.style.display = 'none';
+        })
+    }
+
+
 
     displayGameOver(result){
         console.log(result)
@@ -242,7 +271,7 @@ class View{
             console.log('2 wins')
             this.gameOverHeading.style.color = '#31C3BD'
         }
-        //this.gameOverOverlay.style.display = 'flex';
+        this.gameOverOverlay.style.display = 'flex';
         this.gameOverShadow.style.display = 'block';
         this.gameOverHeading.textContent = `${result} TAKES THE ROUND`;
         this.gameOverSubhead.textContent = `PLAYER ${result} WINS!`;
@@ -256,6 +285,7 @@ class Controller {
         this.view = view;
 
         this.view.bindMove(this.handleMove);
+        this.view.bindReplayModal(this.handleReplayModal)
     }
 
     handleMove = (square) => {
@@ -270,6 +300,12 @@ class Controller {
     handleWin(result){
         return result ? this.view.displayGameOver(result) : null;
     }
+
+    handleReplayModal = () => {
+        this.view.resetSquares();
+        this.model.resetBoard();
+    }
+
 
 }
 
