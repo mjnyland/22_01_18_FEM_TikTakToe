@@ -1,5 +1,6 @@
 html, main {
   height: 100%;
+  font-family: 'Outfit', sans-serif;
 }
 
 body {
@@ -43,7 +44,6 @@ body {
           align-items: center;
   -ms-flex-pack: distribute;
       justify-content: space-around;
-  font-family: 'Outfit', sans-serif;
   -webkit-box-shadow: 0px 3px .5px #101d23;
           box-shadow: 0px 3px .5px #101d23;
 }
@@ -91,7 +91,7 @@ body {
           box-shadow: 0px 3px .5px #101d23;
 }
 
-.x-square {
+.o-square {
   background-color: #F2B137;
   height: 100px;
   width: 100px;
@@ -100,7 +100,7 @@ body {
           box-shadow: 0px 3px .5px #101d23;
 }
 
-.o-square {
+.x-square {
   background-color: #31C3BD;
   height: 100px;
   width: 100px;
@@ -109,31 +109,55 @@ body {
           box-shadow: 0px 3px .5px #101d23;
 }
 
-.player-one-score,
-.ties-score,
-.player-two-score {
+.player-one-score-cont,
+.ties-score-cont,
+.player-two-score-cont {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -ms-flex-pack: distribute;
+      justify-content: space-around;
   height: 100%;
   width: 100%;
   border: none;
   border-radius: 5px;
 }
 
-.player-one-score {
+.player-one-score-cont {
   background-color: #31C3BD;
   -webkit-box-shadow: 0px 3px .5px #188884;
           box-shadow: 0px 3px .5px #188884;
 }
 
-.ties-score {
+.ties-score-cont {
   background-color: #A8BFC9;
   -webkit-box-shadow: 0px 3px .5px #7a8488;
           box-shadow: 0px 3px .5px #7a8488;
 }
 
-.player-two-score {
+.player-two-score-cont {
   background-color: #F2B137;
   -webkit-box-shadow: 0px 3px .5px #b9821b;
           box-shadow: 0px 3px .5px #b9821b;
+}
+
+.score-label {
+  font-weight: 200;
+  margin: .3em 0 0 0;
+}
+
+.player-one-score,
+.ties-score,
+.player-two-score {
+  font-weight: 600;
+  margin: 0 0 .3em 0;
 }
 
 .game-over-overlay,
@@ -154,12 +178,6 @@ body {
       justify-content: space-around;
   padding: 1em 0 1em 0;
   z-index: 200;
-}
-
-.game-over-subhead,
-.game-over-heading,
-.restart-game-heading {
-  font-family: 'Outfit', sans-serif;
 }
 
 .game-over-heading {
@@ -193,7 +211,6 @@ body {
 }
 
 .quit-button {
-  font-family: 'Outfit', sans-serif;
   height: 40px;
   width: 38%;
   background-color: #A8BFC9;
@@ -202,7 +219,6 @@ body {
 }
 
 .next-round-button {
-  font-family: 'Outfit', sans-serif;
   height: 40px;
   width: 58%;
   background-color: #F2B137;
@@ -224,7 +240,6 @@ body {
 }
 
 .restart-button {
-  font-family: 'Outfit', sans-serif;
   height: 40px;
   width: 50%;
   background-color: #F2B137;
@@ -234,7 +249,6 @@ body {
 }
 
 .cancel-button {
-  font-family: 'Outfit', sans-serif;
   height: 40px;
   width: 50%;
   background-color: #A8BFC9;
