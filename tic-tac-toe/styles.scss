@@ -5,8 +5,8 @@ $lightYellow: #FFC860;
 $darkCyan: #31C3BD;
 $lightCyan: #65E9E4;
 $semiDarkNavy: #1F3641;
-$silver: #A8BFC9;
 $darkNavy: #1A2A33;
+$silver: #A8BFC9;
 
 html, main{
     height: 100%;
@@ -79,11 +79,15 @@ body{
     width: 100px;
     border-radius: 5px;
     box-shadow: 0px 3px .5px #101d23;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 
+
 .o-square{
-    background-color: $darkYellow;
+    pointer-events: none;
     height: 100px;
     width: 100px;
     border-radius: 5px;
@@ -91,11 +95,19 @@ body{
 }
 
 .x-square{
-    background-color: $darkCyan;
+    pointer-events: none;
     height: 100px;
     width: 100px;
     border-radius: 5px;
     box-shadow: 0px 3px .5px #101d23;
+}
+
+.x-stroke,
+.o-stroke,
+.x-solid,
+.o-solid{
+    display: none;
+    pointer-events: none;
 }
 
 
@@ -143,7 +155,113 @@ body{
 }
 
 
+.new-game-overlay{
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    background-color: $darkNavy;
+}
 
+.pick-player-cont{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 150px;
+    width: 50%;
+    border-radius: 10px;
+    background-color: #1F3641;
+    box-shadow: 0px 3px .5px #101d23;
+    margin: 50px 0 50px 0;
+}
+
+.pick-player-heading{
+    color: $silver;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.pick-player-disc{
+    color: $silver;
+    font-size: 10px;
+    font-weight: 300;
+    opacity: .7;
+    letter-spacing: 1px;
+}
+
+.CPU-mode-button,
+.multiplayer-button{
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    letter-spacing: .5px;
+    color: $darkNavy;
+    font-size: 15px;
+    border-radius: 5px;
+    border: none;
+    height: 50px;
+    width: 50%;;
+}
+
+.x-or-o-button{
+    display: flex;
+    height: 45px;
+    width: 85%;
+    background-color: $darkNavy;
+    border-radius: 5px;
+    padding: .5em;
+}
+
+.pick-x,
+.pick-o{
+    border-radius: 5px;
+    display: flex;
+    width: 50%;
+}
+
+.pick-o{
+    background-color: $silver;
+}
+
+.pick-x-path{
+    fill: $silver;  
+}
+
+.pick-o-path{
+    fill: $darkNavy;
+}
+
+.pick-x svg,
+.pick-o svg{
+    margin: 0 auto;
+}
+
+.CPU-mode-button{
+    margin-bottom: 1em;
+    background-color: $darkYellow;
+    box-shadow: 0px 3px .5px #b9821b;
+}
+
+.multiplayer-button{
+    background-color: $darkCyan;
+    box-shadow: 0px 3px .5px #188884;   
+}
+
+
+
+
+
+
+
+
+.game-over-heading-cont{
+    display: flex;
+    align-items: center;
+}
 
 
 
@@ -164,13 +282,18 @@ body{
 
 
 .game-over-heading{
-    margin: 0;
+    margin: 0 0 0 .5em;
 }
 
 .game-over-subhead{
     color: $silver;
     margin: 0;
     font-size: 12px;
+}
+
+.game-over-x-solid,
+.game-over-o-solid{
+    display: none;
 }
 
 .button-container{

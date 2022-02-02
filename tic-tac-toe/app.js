@@ -7,44 +7,79 @@ class Model{
             0: {
                 isAvail: true,
                 occupiedBy: null,
+                index: 0
             },
             1: {
                 isAvail: true,
                 occupiedBy: null,
+                index: 1
             },
             2: {
                 isAvail: true,
                 occupiedBy: null,
+                index: 2
             },
             3: {
                 isAvail: true,
                 occupiedBy: null,
+                index: 3
             },
             4: {
                 isAvail: true,
                 occupiedBy: null,
+                index: 4
             },
             5: {
                 isAvail: true,
                 occupiedBy: null,
+                index: 5
             },
             6: {
                 isAvail: true,
                 occupiedBy: null,
+                index: 6
             },
             7: {
                 isAvail: true,
                 occupiedBy: null,
+                index: 7
             },
             8: {
                 isAvail: true,
                 occupiedBy: null,
-            }
+                index: 8
+            },
             
+
+            avail(){
+                let availSquares = [];
+                for (let i = 0; i < 9; i++){
+                    if(this[i].isAvail){
+                        availSquares.push(this[i])
+                    }
+                }
+                return availSquares
+            }
         };
+        this.arrays = [
+            [this.board[0], this.board[1], this.board[2]],
+            [this.board[3], this.board[4], this.board[5]],
+            [this.board[6], this.board[7], this.board[8]],
+
+            [this.board[0], this.board[3], this.board[6]],
+            [this.board[1], this.board[4], this.board[7]],
+            [this.board[2], this.board[5], this.board[8]],
+
+            [this.board[0], this.board[4], this.board[8]],
+            [this.board[2], this.board[4], this.board[6]]  
+        ]
 
         this.currentUser = 1;
         this.result = null;
+        this.gameMode = 'CPU';
+        this.player1 = null;
+        this.player2 = null;
+
         
         if(localStorage.length > 0){
             this.score = {
@@ -62,7 +97,6 @@ class Model{
     }
 
     setLocalStorageScore(){
-        console.log('fired')
         localStorage.setItem('xScore', `${this.score.xScore}`);
         localStorage.setItem('yScore', `${this.score.yScore}`);
         localStorage.setItem('ties', `${this.score.ties}`);
@@ -78,7 +112,7 @@ class Model{
     }
 
     notAvail(){
-        return;
+        console.log('not available')
     }
 
     checkResult() {
@@ -86,25 +120,25 @@ class Model{
         this.board[3].occupiedBy, this.board[4].occupiedBy, this.board[5].occupiedBy, this.board[6].occupiedBy,
         this.board[7].occupiedBy, this.board[8].occupiedBy]
 
-        const arrays = [
-            [this.board[0].occupiedBy, this.board[1].occupiedBy, this.board[2].occupiedBy],
-            [this.board[3].occupiedBy, this.board[4].occupiedBy, this.board[5].occupiedBy],
-            [this.board[6].occupiedBy, this.board[7].occupiedBy, this.board[8].occupiedBy],
-
-            [this.board[0].occupiedBy, this.board[3].occupiedBy, this.board[6].occupiedBy],
-            [this.board[1].occupiedBy, this.board[4].occupiedBy, this.board[7].occupiedBy],
-            [this.board[2].occupiedBy, this.board[5].occupiedBy, this.board[8].occupiedBy],
-
-            [this.board[0].occupiedBy, this.board[4].occupiedBy, this.board[8].occupiedBy],
-            [this.board[2].occupiedBy, this.board[4].occupiedBy, this.board[6].occupiedBy]    
-        ]
+        let obj = {
+            winner: null,
+            winningArr: null,
+            winningPlayer: null
+        }
 
         let result;
+        let winningArr;
+        let i = 0;
 
-        arrays.forEach(arr => {
-            if(this.checkWin(arr)){
-                result = this.checkWin(arr);
+        this.arrays.forEach(arr => {
+            let check = [arr[0].occupiedBy, arr[1].occupiedBy, arr[2].occupiedBy];
+            if(this.checkWin(check)){
+                result = this.checkWin(check);
+                obj.winner = this.checkWin(check)
+                winningArr = this.arrays[i];
+                obj.winningArr = this.arrays[i]
             }
+            i++;
         })
 
         if (result === undefined){
@@ -113,9 +147,15 @@ class Model{
 
         if(result){
             this.result = result;
+            if(this.player1 === result){
+                obj.winningPlayer = 'PLAYER 1'
+            } else if (this.player2 === result){
+                obj.winningPlayer = 'PLAYER 2'
+            }
         }
 
-        return result;
+        return obj;
+
     }
 
     checkWin(arr){
@@ -136,6 +176,7 @@ class Model{
 
 
     makeMove(square){
+        console.log(this.board)
         const targetSquare = this.board[square];
         if(targetSquare.isAvail === true){
             targetSquare.occupiedBy = this.currentUser;
@@ -143,6 +184,10 @@ class Model{
         } else {
             this.notAvail();
         }
+    }
+
+    getRandomInt(max) {
+        return Math.floor(Math.random() * max);
     }
 
     resetBoard(){
@@ -154,6 +199,19 @@ class Model{
         this.currentUser = 1;
     }
 
+    makeEasyCPUMove(){
+        const availSquares = this.board.avail();
+        const targetSquare = availSquares[this.getRandomInt(availSquares.length)]
+        targetSquare.isAvail = false;
+
+        if(this.player1 === 1){
+            targetSquare.occupiedBy = 2;
+        } else if (this.player1 === 2){
+            targetSquare.occupiedBy = 1;  
+        }
+        return targetSquare.index
+    }
+
 }
 
 //Anything relating to the DOM should be stored in here
@@ -162,35 +220,34 @@ class View{
     constructor(){
         this.body = this.getElement('body')
 
+        this.newGameOverlay = this.getElement('.new-game-overlay')
+        this.pickO = this.getElement('.pick-o');
+        this.pickX = this.getElement('.pick-x');
+        this.newCPUButton = this.getElement('.CPU-mode-button');
+        this.newMultiButton = this.getElement('.multiplayer-button')
+
         this.squaresCont = this.getElement('.square-container');
         this.turnButton = this.getElement('.turn-button');
         this.xTurn = this.getElement('.x-icon');
         this.oTurn = this.getElement('.o-icon');
         this.replayButton = this.getElement('.replay-button');
         this.replayButtonModal = this.getElement('.restart-button');
-        this.replayCancel = this.getElement('.cancel-button');
+        this.replayCancel = this.getElement('.cancel-button'); 
 
-        this.squareZero = this.createElement('div', 'squareZero', 'square');
-        this.squareOne = this.createElement('div', 'squareOne', 'square');
-        this.squareTwo = this.createElement('div', 'squareTwo', 'square');
-        this.squareThree = this.createElement('div', 'squareThree', 'square');
-        this.squareFour = this.createElement('div', 'squareFour', 'square');
-        this.squareFive = this.createElement('div', 'squareFive', 'square');
-        this.squareSix = this.createElement('div', 'squareSix', 'square');
-        this.squareSeven = this.createElement('div', 'squareSeven', 'square');
-        this.squareEight = this.createElement('div', 'squareEight', 'square');
         this.playerOneScoreCont = this.getElement('.player-one-score-cont');
         this.playerOneScore = this.getElement('.player-one-score');
         this.tiesScore = this.getElement('.ties-score');
         this.playerTwoScore = this.getElement('.player-two-score');
-        this.appendSquares([this.squareZero, this.squareOne, this.squareTwo, this.squareThree, this.squareFour, this.squareFive, this.squareSix, this.squareSeven, this.squareEight])
-
 
         this.gameOverOverlay = this.getElement('.game-over-overlay');
         this.gameOverSubhead = this.createElement('h3', 'game-over-subhead');
         this.gameOverHeading = this.createElement('h1', 'game-over-heading');
+        this.gameOverHeadingCont = this.getElement('.game-over-heading-cont');
+        this.gameOverX = this.getElement('.game-over-x-solid')
+        this.gameOverO = this.getElement('.game-over-o-solid')
         this.gameOverShadow = this.createElement('div', 'shadow')
-        this.gameOverOverlay.append(this.gameOverSubhead, this.gameOverHeading);
+        this.gameOverOverlay.insertBefore(this.gameOverSubhead, this.gameOverHeadingCont);
+        this.gameOverHeadingCont.append(this.gameOverHeading)
         this.restartGameOverlay = this.getElement('.restart-game-overlay')
 
         this.body.append(this.gameOverShadow)
@@ -211,20 +268,13 @@ class View{
         return element;
     }
 
-
-    appendSquares(arr){
-        arr.forEach(element => {
-            this.squaresCont.insertBefore(element, this.playerOneScoreCont)
-        })
-    }
-
     displayCurrTurn(user){
         switch (user){
             case 1: 
                 this.xTurn.style.display = 'block';
                 this.oTurn.style.display = 'none';
                 break;
-            case 2: 
+            case 2:
                 this.xTurn.style.display = 'none';
                 this.oTurn.style.display = 'block';
                 break;
@@ -237,9 +287,12 @@ class View{
 
         if(user === 1){
             targetSquare.classList.add('x-square');
-            
+            targetSquare.children[2].style.display = 'none';
+            targetSquare.children[3].style.display = 'block';            
         } else if (user === 2){
             targetSquare.classList.add('o-square');
+            targetSquare.children[0].style.display = 'none';
+            targetSquare.children[1].style.display = 'block';
         }
     }
 
@@ -247,6 +300,31 @@ class View{
         this.playerOneScore.textContent = x;
         this.tiesScore.textContent = t;
         this.playerTwoScore.textContent = y;
+    }
+
+    displayHover(element, user){
+        if(element.classList.contains('x-square') === true || element.classList.contains('o-square') === true){
+            return
+        } else {
+            const xStroke = element.children[2]
+            const oStroke = element.children[0]
+            if (user === 1){
+                oStroke.style.display = 'none'
+                xStroke.style.display = 'block'
+    
+            } else if (user === 2){
+                xStroke.style.display = 'none'
+                oStroke.style.display = 'block'
+            }
+        }
+    }
+
+    hideHover(element, user){
+        const xStroke = element.children[2]
+        const oStroke = element.children[0]
+
+        xStroke.style.display = 'none'
+        oStroke.style.display = 'none'
     }
 
     checkMatch(target){
@@ -258,24 +336,50 @@ class View{
         }
     }
 
-    bindMove(callback){
+    bindPickPlayer(callback){
+        this.pickO.addEventListener('click', e => {
+            callback(this.pickO)
+        })
+
+        this.pickX.addEventListener('click', e => {
+            callback(this.pickX)
+        })
+    }
+
+    bindNewGame(callback){
+        this.newCPUButton.addEventListener('click', e => {
+            callback(this.newCPUButton)
+        })
+
+        this.newMultiButton.addEventListener('click', e => {
+            callback(this.newMultiButton)
+        })
+    }
+
+
+    bindMove(user, callback){
+        console.log(user)
         const squares = document.querySelectorAll('.square');
         squares.forEach(square => {
+
             square.addEventListener('click', e => {
                 const targetIndex = this.checkMatch(e.target);
-                callback(targetIndex); 
+                callback(targetIndex);
             })
-
+        
             square.addEventListener('mouseover', e => {
-                square.innerHTML = `
-                <svg width="64" height="64" xmlns="http://www.w3.org/2000/svg"><path d="M51.12 1.269c.511 0 1.023.195 1.414.586l9.611 9.611c.391.391.586.903.586 1.415s-.195 1.023-.586 1.414L44.441 32l17.704 17.705c.391.39.586.902.586 1.414 0 .512-.195 1.024-.586 1.415l-9.611 9.611c-.391.391-.903.586-1.415.586a1.994 1.994 0 0 1-1.414-.586L32 44.441 14.295 62.145c-.39.391-.902.586-1.414.586a1.994 1.994 0 0 1-1.415-.586l-9.611-9.611a1.994 1.994 0 0 1-.586-1.415c0-.512.195-1.023.586-1.414L19.559 32 1.855 14.295a1.994 1.994 0 0 1-.586-1.414c0-.512.195-1.024.586-1.415l9.611-9.611c.391-.391.903-.586 1.415-.586s1.023.195 1.414.586L32 19.559 49.705 1.855c.39-.391.902-.586 1.414-.586Z" stroke="#31C3BD" stroke-width="2" fill="none"/></svg>
-                `
+                const targetIndex = this.checkMatch(e.target);
+                this.displayHover(square, user);
             })
 
-            square.addEventListener('mousout', e => {
-                square.innerHTML = '';
+            square.addEventListener('mouseout', e => {
+                const targetIndex = this.checkMatch(e.target);
+                this.hideHover(square, user);
             })
+            
         })
+
+        
     }
     
     bindReplayModal(callback){
@@ -295,11 +399,11 @@ class View{
             this.gameOverShadow.style.display = 'none';
 
             for (let xSquare of xSquares){
-                xSquare.classList.remove('x-square');
+                xSquare.children[3].style.display = 'none';
             }
 
             for (let oSquare of oSquares){
-                oSquare.classList.remove('o-square');
+                oSquare.children[1].style.display = 'none';
             }
 
             this.displayCurrTurn(1)
@@ -313,18 +417,54 @@ class View{
 
 
 
-    displayGameOver(result){
+    displayGameOver(obj, result){
+        console.log(obj)
+        const winningPlayer = obj.winningPlayer;
         if(result === 1){
+            this.gameOverX.style.display = 'inline';
             this.gameOverHeading.style.color = '#31C3BD';
         } else if (result === 2) {
+            this.gameOverO.style.display = 'inline';
             this.gameOverHeading.style.color = '#F2B137';
         } else if (result === 'tie'){
             this.gameOverHeading.style.color = '#A8BFC9';
         }
-        //this.gameOverOverlay.style.display = 'flex';
+        this.gameOverOverlay.style.display = 'flex';
         this.gameOverShadow.style.display = 'block';
-        this.gameOverHeading.textContent = `${result} TAKES THE ROUND`;
-        this.gameOverSubhead.textContent = `PLAYER ${result} WINS!`;
+        this.gameOverHeading.textContent = `TAKES THE ROUND`;
+
+
+        this.gameOverSubhead.textContent = `${winningPlayer} WINS!`;
+    }
+
+    displayWinners(obj, result){
+
+        const squares = document.querySelectorAll('.square');
+
+        const winningSquareOne = squares[obj.winningArr[0].index] 
+        const winningSquareTwo = squares[obj.winningArr[1].index] 
+        const winningSquareThree = squares[obj.winningArr[2].index] 
+
+
+        switch (result) {
+            case 1:
+                winningSquareOne.style.backgroundColor = '#31C3BD';
+                winningSquareTwo.style.backgroundColor = '#31C3BD';
+                winningSquareThree.style.backgroundColor = '#31C3BD';
+                winningSquareOne.children[3].children[0].style.fill = '#1A2A33'
+                winningSquareTwo.children[3].children[0].style.fill = '#1A2A33'
+                winningSquareThree.children[3].children[0].style.fill = '#1A2A33'
+                break;
+            case 2:
+                winningSquareOne.style.backgroundColor = '#F2B137';
+                winningSquareTwo.style.backgroundColor = '#F2B137';
+                winningSquareThree.style.backgroundColor = '#F2B137';
+                winningSquareOne.children[1].children[0].style.fill = '#1A2A33'
+                winningSquareTwo.children[1].children[0].style.fill = '#1A2A33'
+                winningSquareThree.children[1].children[0].style.fill = '#1A2A33'
+                break;
+        }
+
     }
 }
 
@@ -334,7 +474,8 @@ class Controller {
         this.model = model;
         this.view = view;
 
-        this.view.bindMove(this.handleMove);
+        this.view.bindPickPlayer(this.handlePickPlayer)
+        this.view.bindNewGame(this.handleNewGame)
         this.view.bindReplayModal(this.handleReplayModal);
         
         if (localStorage.length > 0){
@@ -348,26 +489,107 @@ class Controller {
         
     }
 
+
+
+    handlePickPlayer = (target) => {
+        const picked = document.querySelector('.picked')
+        if(target === this.view.pickX){
+            picked.classList.remove('picked')
+            this.view.pickX.style.backgroundColor = '#A8BFC9';
+            this.view.pickX.children[0].children[0].style.fill = '#1A2A33';
+            this.view.pickX.classList.add('picked')
+
+            this.view.pickO.style.backgroundColor = '#1A2A33';
+            this.view.pickO.children[0].children[0].style.fill = '#A8BFC9';
+        } else if (target === this.view.pickO){
+            picked.classList.remove('picked')
+            this.view.pickO.style.backgroundColor = '#A8BFC9';
+            this.view.pickO.children[0].children[0].style.fill = '#1A2A33';
+            this.view.pickO.classList.add('picked')
+
+            this.view.pickX.style.backgroundColor = '#1A2A33';
+            this.view.pickX.children[0].children[0].style.fill = '#A8BFC9';
+        }
+    }
+
+    handleNewGame = (target) => {
+        const pickedMark = document.querySelector('.picked')
+
+        if(pickedMark === this.view.pickX){
+            this.model.player1 = 1;
+            this.model.player2 = 2;
+        } else if (pickedMark === this.view.pickO){
+            this.model.player1 = 2;
+            this.model.player2 = 1;
+        }
+
+        if(target === this.view.newCPUButton){
+            this.model.gameMode = 'CPU'
+            if(this.model.player1 === 2){
+                this.view.displaySquares(this.model.makeEasyCPUMove(), this.model.currentUser);
+                this.view.displayCurrTurn(this.model.switchPlayer());
+                this.view.bindMove(this.model.currentUser, this.handleMove)
+            } else if (this.model.player1 === 1){
+                this.view.bindMove(this.model.currentUser, this.handleMove)
+            }
+        } else if (target === this.view.newMultiButton){
+            this.model.gameMode = 'multiplayer';
+            this.view.bindMove(this.model.currentUser, this.handleMove)
+        }
+        this.view.newGameOverlay.style.display = 'none';
+    }
+
     handleMove = (square) => {
-        if(this.model.board[square].isAvail === true){
+        if(this.model.gameMode === 'multiplayer'){
+            if(this.model.board[square].isAvail === true){
+                this.model.makeMove(square);
+                this.view.displaySquares(square, this.model.currentUser);
+        
+                this.model.checkResult()
+                this.handleGameOver(this.model.result)
+                this.view.displayCurrTurn(this.model.switchPlayer());
+                this.view.bindMove(this.model.currentUser, this.handleMove);
+            }
+        } else if (this.model.gameMode === 'CPU') {
             this.model.makeMove(square);
             this.view.displaySquares(square, this.model.currentUser);
-    
-            this.model.checkResult()
-            this.handleGameOver(this.model.result)
-            this.view.displayCurrTurn(this.model.switchPlayer());
+
+            if(app.model.checkResult().winner){
+                this.model.checkResult()
+                this.handleGameOver(this.model.result)
+            } else if(app.model.checkResult() === 'tie'){
+                this.model.checkResult()
+                this.handleGameOver(this.model.result)
+            }else {
+                this.model.switchPlayer();
+            }
+
+            this.view.displaySquares(this.model.makeEasyCPUMove(), this.model.currentUser);
+            if(app.model.checkResult().winner){
+                this.model.checkResult()
+                this.handleGameOver(this.model.result)
+            } else if(app.model.checkResult() === 'tie'){
+                this.model.checkResult()
+                this.handleGameOver(this.model.result)
+            } else {
+                this.model.switchPlayer();
+            }
         }
     };
 
     handleGameOver(result){
+
+
         switch (result){
-            case 1: 
-                this.view.displayGameOver(result);
+            case 1:
+                this.view.displayWinners(this.model.checkResult(), result)
+                this.view.displayGameOver(this.model.checkResult(), result);
                 this.model.score.xScore += 1;
                 this.model.setLocalStorageScore();
                 break;
             case 2:
-                this.view.displayGameOver(result);
+                this.view.displayWinners(this.model.checkResult(), result)
+                this.view.displayGameOver(this.model.checkResult(), result);
                 this.model.score.yScore += 1;
                 this.model.setLocalStorageScore()
                 break;
@@ -379,7 +601,7 @@ class Controller {
                 break;
         }
 
-        return result ? this.view.displayGameOver(result) : null;
+        //return result ? this.view.displayGameOver(this.model.checkResult(), result) : null;
     }
 
     handleReplayModal = () => {
@@ -387,7 +609,9 @@ class Controller {
         this.model.resetBoard();
     }
 
-
+    handleHover = () => {
+        this.view.displayHover();
+    }
 }
 
 const app = new Controller(new Model(), new View())
