@@ -237,7 +237,8 @@ class View{
         this.oTurn = this.getElement('.o-icon');
         this.replayButton = this.getElement('.replay-button');
         this.replayButtonModal = this.getElement('.restart-button');
-        this.replayCancel = this.getElement('.cancel-button'); 
+        this.replayCancel = this.getElement('.cancel-button');
+        this.nextRoundButton = this.getElement('.next-round-button')
 
         this.playerOneScoreCont = this.getElement('.player-one-score-cont');
         this.playerOneScore = this.getElement('.player-one-score');
@@ -358,6 +359,10 @@ class View{
 
         this.newMultiButton.addEventListener('click', e => {
             callback(this.newMultiButton)
+        })
+
+        this.nextRoundButton.addEventListener('click', e => {
+            window.location.reload()
         })
     }
 
