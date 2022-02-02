@@ -116,6 +116,7 @@ class Model{
     }
 
     checkResult() {
+        console.log('checking result')
         const allSquares = [this.board[0].occupiedBy, this.board[1].occupiedBy, this.board[2].occupiedBy,
         this.board[3].occupiedBy, this.board[4].occupiedBy, this.board[5].occupiedBy, this.board[6].occupiedBy,
         this.board[7].occupiedBy, this.board[8].occupiedBy]
@@ -141,9 +142,13 @@ class Model{
             i++;
         })
 
+        console.log(result)
+
         if (result === undefined){
             result = this.checkTie(allSquares);
         }
+
+        console.log(result)
 
         if(result){
             this.result = result;
@@ -358,7 +363,6 @@ class View{
 
 
     bindMove(user, callback){
-        console.log(user)
         const squares = document.querySelectorAll('.square');
         squares.forEach(square => {
 
@@ -391,8 +395,9 @@ class View{
         })
     }
 
-    resetSquares(){
+    resetSquares(callback){
         this.replayButtonModal.addEventListener('click', (e) => {
+        
             const xSquares = document.querySelectorAll('.x-square');
             const oSquares = document.querySelectorAll('.o-square');
             this.restartGameOverlay.style.display = 'none';
@@ -400,13 +405,16 @@ class View{
 
             for (let xSquare of xSquares){
                 xSquare.children[3].style.display = 'none';
+                xSquare.classList.remove('x-square');
             }
 
             for (let oSquare of oSquares){
                 oSquare.children[1].style.display = 'none';
+                oSquare.classList.remove('o-square');
             }
 
             this.displayCurrTurn(1)
+            callback()
         })
 
         this.replayCancel.addEventListener('click', (e) => {
@@ -423,18 +431,22 @@ class View{
         if(result === 1){
             this.gameOverX.style.display = 'inline';
             this.gameOverHeading.style.color = '#31C3BD';
+            this.gameOverHeading.textContent = `TAKES THE ROUND`;
         } else if (result === 2) {
             this.gameOverO.style.display = 'inline';
             this.gameOverHeading.style.color = '#F2B137';
+            this.gameOverHeading.textContent = `TAKES THE ROUND`;
         } else if (result === 'tie'){
+            this.gameOverSubhead.style.display = 'none';
             this.gameOverHeading.style.color = '#A8BFC9';
+            this.gameOverHeading.textContent = `ROUND TIED`;
         }
         this.gameOverOverlay.style.display = 'flex';
         this.gameOverShadow.style.display = 'block';
-        this.gameOverHeading.textContent = `TAKES THE ROUND`;
 
-
-        this.gameOverSubhead.textContent = `${winningPlayer} WINS!`;
+        if(winningPlayer){
+            this.gameOverSubhead.textContent = `${winningPlayer} WINS!`;
+        }
     }
 
     displayWinners(obj, result){
@@ -551,28 +563,19 @@ class Controller {
                 this.view.bindMove(this.model.currentUser, this.handleMove);
             }
         } else if (this.model.gameMode === 'CPU') {
+            //user move
             this.model.makeMove(square);
             this.view.displaySquares(square, this.model.currentUser);
+            this.model.checkResult();
+            this.handleGameOver(this.model.result)
+            this.view.displayCurrTurn(this.model.switchPlayer())
 
-            if(app.model.checkResult().winner){
-                this.model.checkResult()
-                this.handleGameOver(this.model.result)
-            } else if(app.model.checkResult() === 'tie'){
-                this.model.checkResult()
-                this.handleGameOver(this.model.result)
-            }else {
-                this.model.switchPlayer();
-            }
-
+            if(this.model.result === null){ // making sure there isn't a winner
+            //cpu move
             this.view.displaySquares(this.model.makeEasyCPUMove(), this.model.currentUser);
-            if(app.model.checkResult().winner){
-                this.model.checkResult()
-                this.handleGameOver(this.model.result)
-            } else if(app.model.checkResult() === 'tie'){
-                this.model.checkResult()
-                this.handleGameOver(this.model.result)
-            } else {
-                this.model.switchPlayer();
+            this.model.checkResult();
+            this.handleGameOver(this.model.result)
+            this.view.displayCurrTurn(this.model.switchPlayer())
             }
         }
     };
@@ -594,9 +597,11 @@ class Controller {
                 this.model.setLocalStorageScore()
                 break;
             case 'tie':
-                this.view.displayGameOver(result);
+                console.log('tie detected')
+                this.view.displayGameOver(this.model.checkResult(), result);
                 this.model.score.ties += 1;
                 this.model.setLocalStorageScore();
+                break;
             default:
                 break;
         }
@@ -604,8 +609,17 @@ class Controller {
         //return result ? this.view.displayGameOver(this.model.checkResult(), result) : null;
     }
 
+    handleReset = () => {
+        if(this.model.gameMode === 'CPU'){
+            if(this.model.player1 === 2){
+                this.view.displaySquares(this.model.makeEasyCPUMove(), this.model.currentUser);
+                this.view.displayCurrTurn(this.model.switchPlayer());
+            }
+        }
+    }
+
     handleReplayModal = () => {
-        this.view.resetSquares();
+        this.view.resetSquares(this.handleReset);
         this.model.resetBoard();
     }
 
