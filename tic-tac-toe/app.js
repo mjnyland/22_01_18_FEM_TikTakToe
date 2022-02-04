@@ -116,7 +116,6 @@ class Model{
     }
 
     checkResult() {
-        console.log('checking result')
         const allSquares = [this.board[0].occupiedBy, this.board[1].occupiedBy, this.board[2].occupiedBy,
         this.board[3].occupiedBy, this.board[4].occupiedBy, this.board[5].occupiedBy, this.board[6].occupiedBy,
         this.board[7].occupiedBy, this.board[8].occupiedBy]
@@ -611,7 +610,6 @@ class Controller {
                 break;
         }
 
-        //return result ? this.view.displayGameOver(this.model.checkResult(), result) : null;
     }
 
     handleReset = () => {
@@ -633,4 +631,8 @@ class Controller {
     }
 }
 
+const Fruit = Object.create(Controller);
+
 const app = new Controller(new Model(), new View())
+console.log(Fruit);
+
